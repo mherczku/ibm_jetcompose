@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
@@ -12,9 +13,8 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,17 +28,38 @@ import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.glide.GlideImage
 import hu.hm.ibm_jetcompose.data.model.Item
+import hu.hm.ibm_jetcompose.data.model.Playlist
 import hu.hm.ibm_jetcompose.ui.theme.graySurface
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import timber.log.Timber
 
 
+@InternalCoroutinesApi
 @Composable
 fun ListScreen(
     viewModel: ListViewModel
 ){
-    val itemss = remember {viewModel.getData()}
-    val resultList = itemss.observeAsState(initial = listOf())
+
+    //val items = remember {viewModel.getData()} // remember?
+    //val resultList = items.observeAsState(initial = listOf())
+
+    //with flow
+    val items = viewModel.getDataFlow()
+    val resultList2 = items.collectAsState(initial = listOf())
+
+    //transfer to viewModel
+    //val a = viewModel.getDataFlow()
+    //Timber.d("viewmode getdataflow from composable")
+    val resultList = viewModel.items.observeAsState(initial = listOf())
+
+    val listState = rememberLazyListState()
+    listState.OnBottomReached() {
+        viewModel.fetchMore()
+    }
     LazyColumn(
-        state = rememberLazyListState()
+        state = listState
     ) {
         items(
             items = resultList.value,
@@ -89,10 +110,34 @@ private fun ItemImage(item: Item) {
                 dropOff = 0.65f,
                 tilt = 20f
             ),
+            circularReveal = CircularReveal(1000),
             failure = {
                 Text(text = "image request failed.", color = Color.White)
             }
         )
     }
+}
 
+
+
+@InternalCoroutinesApi
+@Composable
+fun LazyListState.OnBottomReached(
+    loadMore : () -> Unit
+){
+    Timber.d("BottomReached")
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+                ?: return@derivedStateOf true
+
+            lastVisibleItem.index == layoutInfo.totalItemsCount - 1
+        }
+    }
+
+    // Convert the state into a cold flow and collect
+    if(shouldLoadMore.value){
+        Timber.d("BottomReached and loading more")
+        loadMore.invoke()
+    }
 }

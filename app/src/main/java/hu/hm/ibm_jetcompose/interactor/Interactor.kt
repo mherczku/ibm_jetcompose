@@ -12,11 +12,12 @@ import javax.inject.Singleton
 @Singleton
 class Interactor @Inject constructor(private val api: Api){
 
-    suspend fun getData(): Playlist {
+    suspend fun getData(): List<Item> {
         Timber.d("Downloading data")
         val a = api.getData()
-        Timber.d("Received ${a.playlist.size} items")
-        return a
+        val sub = a.playlist.subList(0,15)
+        Timber.d("Received ${sub.size} items")
+        return sub
 
     }
 }

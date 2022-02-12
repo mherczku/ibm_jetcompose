@@ -15,6 +15,7 @@ import hu.hm.ibm_jetcompose.ui.screens.list.ListScreen
 import hu.hm.ibm_jetcompose.ui.screens.list.ListViewModel
 import hu.hm.ibm_jetcompose.ui.theme.Ibm_jetcomposeTheme
 import kotlinx.coroutines.*
+import timber.log.Timber
 import javax.inject.Inject
 import kotlin.coroutines.coroutineContext
 
