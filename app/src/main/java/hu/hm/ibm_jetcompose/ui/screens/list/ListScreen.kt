@@ -1,15 +1,19 @@
 package hu.hm.ibm_jetcompose.ui.screens.list
 
-import androidx.compose.foundation.Image
+import android.widget.ListView
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.Text
@@ -17,26 +21,18 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
-import com.skydoves.landscapist.glide.GlideImage
 import hu.hm.ibm_jetcompose.data.model.Item
-import hu.hm.ibm_jetcompose.data.model.Playlist
 import hu.hm.ibm_jetcompose.ui.theme.graySurface
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
 
 
-@InternalCoroutinesApi
 @Composable
 fun ListScreen(
     viewModel: ListViewModel
@@ -46,28 +42,48 @@ fun ListScreen(
     //val resultList = items.observeAsState(initial = listOf())
 
     //with flow
-    val items = viewModel.getDataFlow()
-    val resultList2 = items.collectAsState(initial = listOf())
+    //val resultList2 = items.collectAsState(initial = listOf())
 
     //transfer to viewModel
     //val a = viewModel.getDataFlow()
     //Timber.d("viewmode getdataflow from composable")
+    LaunchedEffect(key1 = 1){
+        viewModel.getData()
+    }
+    val loading = viewModel.loading.value
     val resultList = viewModel.items.observeAsState(initial = listOf())
 
     val listState = rememberLazyListState()
     listState.OnBottomReached() {
-        viewModel.fetchMore()
+        if(!loading) viewModel.fetchMore()
     }
-    LazyColumn(
-        state = listState
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        items(
-            items = resultList.value,
-            itemContent = {
-                ListItem(item = it, navigateToProfile = {})
+        LazyColumn(
+            state = listState
+        ) {
+            items(
+                items = resultList.value,
+                itemContent = {
+                    ListItem(item = it, navigateToProfile = {})
+                }
+            )
+            if(loading) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
             }
-        )
+        }
+
     }
+
 }
 
 @Composable
@@ -118,9 +134,6 @@ private fun ItemImage(item: Item) {
     }
 }
 
-
-
-@InternalCoroutinesApi
 @Composable
 fun LazyListState.OnBottomReached(
     loadMore : () -> Unit
@@ -128,9 +141,8 @@ fun LazyListState.OnBottomReached(
     Timber.d("BottomReached")
     val shouldLoadMore = remember {
         derivedStateOf {
-            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                ?: return@derivedStateOf true
-
+            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull() ?: return@derivedStateOf false
+            Timber.d("indexes: ${lastVisibleItem.index} =?= ${layoutInfo.totalItemsCount-1}")
             lastVisibleItem.index == layoutInfo.totalItemsCount - 1
         }
     }

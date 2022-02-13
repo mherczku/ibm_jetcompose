@@ -1,55 +1,59 @@
 package hu.hm.ibm_jetcompose.ui.screens.list
 
 import androidx.annotation.WorkerThread
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import hu.hm.ibm_jetcompose.data.model.Item
-import hu.hm.ibm_jetcompose.data.model.Playlist
-import hu.hm.ibm_jetcompose.data.network.Api
 import hu.hm.ibm_jetcompose.interactor.Interactor
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import okhttp3.internal.notifyAll
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+@HiltViewModel
 class ListViewModel @Inject constructor(
-    private val interactor: Interactor,
-    private val coroutineContext: CoroutineContext
+    private val interactor: Interactor
 ) : ViewModel() {
+
+    val loading = mutableStateOf(false)
 
     val items : MutableLiveData<List<Item>> by lazy {
         MutableLiveData()
     }
 
-    fun getData(): LiveData<List<Item>> {
-
-        val list: MutableLiveData<List<Item>> by lazy {
-            MutableLiveData<List<Item>>()
+    fun getData() {
+        viewModelScope.launch {
+            Timber.d("Fetching Data")
+            loading.value = true
+            delay(1500)
+            items.postValue(interactor.getData())
+            loading.value = false
         }
-
-        CoroutineScope(coroutineContext).launch {
-            list.postValue(interactor.getData())
-        }
-        return list
     }
 
-    @WorkerThread
     fun getDataFlow() = flow<List<Item>> {
-        Timber.d("Get Data with Flow")
+        Timber.d("Fetching Data with Flow")
         val playlist = interactor.getData()
-        items.postValue(playlist)
         emit(playlist)
 
-    }.flowOn(Dispatchers.IO)
-
+    }//.onStart { loading.postValue(true) }.onCompletion { loading.postValue(false) }
 
     fun fetchMore()  {
-        CoroutineScope(coroutineContext).launch {
-            items.postValue(interactor.getData().subList(0,5))
+
+        viewModelScope.launch {
+            Timber.d("Fetching more data")
+            loading.value = true
+            delay(1500)
+            val new = items.value?.plus(interactor.getData())
+            loading.value = false
+            items.postValue(new)
         }
     }
 

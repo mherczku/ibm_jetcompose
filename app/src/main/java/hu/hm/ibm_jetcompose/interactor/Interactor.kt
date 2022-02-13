@@ -18,6 +18,5 @@ class Interactor @Inject constructor(private val api: Api){
         val sub = a.playlist.subList(0,15)
         Timber.d("Received ${sub.size} items")
         return sub
-
     }
 }
