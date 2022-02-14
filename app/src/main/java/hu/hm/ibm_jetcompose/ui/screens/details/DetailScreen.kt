@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -18,6 +19,7 @@ import androidx.navigation.NavHostController
 import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
+import hu.hm.ibm_jetcompose.R
 import hu.hm.ibm_jetcompose.data.model.Item
 
 @Composable
@@ -30,7 +32,7 @@ fun DetailScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        val (image, title, list, description, username, email, duration, mediaType, date) = createRefs()
+        val (image, title, list) = createRefs()
         Box(modifier = Modifier
             .constrainAs(image) {
                 top.linkTo(parent.top)
@@ -81,12 +83,12 @@ fun DetailScreen(
 @Composable
 private fun TextLines(item: Item, modifier: Modifier) {
     Column(modifier = modifier) {
-        TextRow(name = "Description:", value = item.description)
-        TextRow(name = "Username:", value = item.userName)
-        TextRow(name = "Email:", value = item.email)
-        TextRow(name = "Duration:", value = item.durationInSec.toString())
-        TextRow(name = "MediaType:", value = item.mediaType)
-        TextRow(name = "Created:", value = item.created)
+        TextRow(name = stringResource(R.string.description), value = item.description)
+        TextRow(name = stringResource(R.string.username), value = item.userName)
+        TextRow(name = stringResource(R.string.email), value = item.email)
+        TextRow(name = stringResource(R.string.duration), value = item.durationInSec.toString())
+        TextRow(name = stringResource(R.string.mediatype), value = item.mediaType)
+        TextRow(name = stringResource(R.string.created), value = item.created)
     }
 }
 
@@ -129,7 +131,7 @@ private fun DetailImage(item: Item) {
             ),
             circularReveal = CircularReveal(1000),
             failure = {
-                Text(text = "image request failed.", color = Color.Blue)
+                Text(text = stringResource(R.string.img_request_failed), color = Color.Black)
             }
         )
     }

@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -28,6 +29,7 @@ import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import hu.hm.ibm_jetcompose.NavScreen
+import hu.hm.ibm_jetcompose.R
 import hu.hm.ibm_jetcompose.data.model.Item
 import hu.hm.ibm_jetcompose.ui.theme.graySurface
 import timber.log.Timber
@@ -135,7 +137,7 @@ private fun ItemImage(item: Item) {
             ),
             circularReveal = CircularReveal(1000),
             failure = {
-                Text(text = "image request failed.", color = Color.White)
+                Text(text = stringResource(R.string.img_request_failed), color = Color.White)
             }
         )
     }

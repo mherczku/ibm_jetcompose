@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">ibm_jetcompose</string>
+    <string name="app_title">IBM Playlist</string>
+    <string name="description">Description:</string>
+    <string name="username">Username:</string>
+    <string name="email">Email:</string>
+    <string name="duration">Duration:</string>
+    <string name="mediatype">MediaType:</string>
+    <string name="created">Created:</string>
+    <string name="img_request_failed">image request failed.</string>
 </resources>
