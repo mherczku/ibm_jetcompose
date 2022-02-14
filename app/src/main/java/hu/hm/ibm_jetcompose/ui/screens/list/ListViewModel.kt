@@ -24,16 +24,17 @@ class ListViewModel @Inject constructor(
 
     val loading = mutableStateOf(false)
 
-    val items : MutableLiveData<List<Item>> by lazy {
+    /* val items : MutableLiveData<List<Item>> by lazy {
         MutableLiveData()
-    }
+    } */
+    val items2 = mutableListOf<Item>()
 
     fun getData() {
         viewModelScope.launch {
             Timber.d("Fetching Data")
             loading.value = true
-            delay(1500)
-            items.postValue(interactor.getData())
+            //items.postValue(interactor.getData())
+            items2.addAll(interactor.getData())
             loading.value = false
         }
     }
@@ -46,14 +47,13 @@ class ListViewModel @Inject constructor(
     }//.onStart { loading.postValue(true) }.onCompletion { loading.postValue(false) }
 
     fun fetchMore()  {
-
         viewModelScope.launch {
             Timber.d("Fetching more data")
             loading.value = true
-            delay(1500)
-            val new = items.value?.plus(interactor.getData())
+            //val new = items.value?.plus(interactor.getData())
+            items2.addAll(interactor.getData())
             loading.value = false
-            items.postValue(new)
+            //items.postValue(new)
         }
     }
 

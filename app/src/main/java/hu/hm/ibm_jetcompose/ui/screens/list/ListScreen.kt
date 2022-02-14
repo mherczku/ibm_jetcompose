@@ -1,20 +1,16 @@
 package hu.hm.ibm_jetcompose.ui.screens.list
 
-import android.widget.ListView
+import android.net.Uri
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -25,9 +21,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.google.gson.Gson
 import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
+import hu.hm.ibm_jetcompose.NavScreen
 import hu.hm.ibm_jetcompose.data.model.Item
 import hu.hm.ibm_jetcompose.ui.theme.graySurface
 import timber.log.Timber
@@ -35,9 +35,9 @@ import timber.log.Timber
 
 @Composable
 fun ListScreen(
-    viewModel: ListViewModel
+    viewModel: ListViewModel,
+    navController: NavController
 ){
-
     //val items = remember {viewModel.getData()} // remember?
     //val resultList = items.observeAsState(initial = listOf())
 
@@ -51,7 +51,8 @@ fun ListScreen(
         viewModel.getData()
     }
     val loading = viewModel.loading.value
-    val resultList = viewModel.items.observeAsState(initial = listOf())
+    //val resultList = viewModel.items.observeAsState(initial = listOf())
+    val resultList = viewModel.items2
 
     val listState = rememberLazyListState()
     listState.OnBottomReached() {
@@ -65,9 +66,12 @@ fun ListScreen(
             state = listState
         ) {
             items(
-                items = resultList.value,
-                itemContent = {
-                    ListItem(item = it, navigateToProfile = {})
+                items = resultList,
+                itemContent = { it ->
+                    ListItem(item = it, navigateTo = {
+                        navController.navigate(NavScreen.Detail.route)
+                        navController.currentBackStackEntry?.arguments?.putParcelable(NavScreen.Detail.argument0, it)
+                    })
                 }
             )
             if(loading) {
@@ -87,15 +91,18 @@ fun ListScreen(
 }
 
 @Composable
-fun ListItem(item: Item, navigateToProfile: (Item) -> Unit) {
+fun ListItem(item: Item, navigateTo: (Item) -> Unit) {
     Card(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable {
+                navigateTo(item)
+            },
         elevation = 2.dp,
         shape = RoundedCornerShape(corner = CornerSize(16.dp)),
     ) {
-        Row(Modifier.clickable { navigateToProfile(item) }) {
+        Row {
             ItemImage(item)
             Column(
                 modifier = Modifier
