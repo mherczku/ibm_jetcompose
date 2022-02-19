@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import hu.hm.ibm_jetcompose.App
+import hu.hm.ibm_jetcompose.BuildConfig
 import hu.hm.ibm_jetcompose.data.network.Api
 import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
@@ -39,7 +40,7 @@ class Definitions {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
-        .baseUrl(Api.ENDPOINT)
+        .baseUrl(BuildConfig.A_BASE_URL)
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

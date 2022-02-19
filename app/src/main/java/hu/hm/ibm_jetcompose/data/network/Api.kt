@@ -7,10 +7,6 @@ import retrofit2.http.GET
 
 interface Api {
 
-    companion object {
-        const val ENDPOINT = "https://android-intern-homework.vercel.app/"
-    }
-
     @GET("/api/")
     suspend fun getData(): Playlist
 

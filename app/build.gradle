@@ -16,6 +16,8 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField 'String', 'A_BASE_URL', "\"https://android-intern-homework.vercel.app/\""
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
